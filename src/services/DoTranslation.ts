@@ -113,13 +113,6 @@ function isComposedOfThreeUniqueChars(str: string): boolean {
     return uniqueChars.size === 3;
 }
 
-const rules = {
-    // 语种: [表示0, 表示1, 表示b和B]
-    "人": [1, '-', '-', '-'],
-    "猫": [1, '喵', '呜', '咪'],
-    "狗": [1, '嗷', '呜', '汪']
-}
-
 function getSubstring(str: string, startIndex: number, length: number): string {
     // 计算结束索引
     const endIndex = startIndex + length;
@@ -146,7 +139,7 @@ function swapChar(mode: 'encode' | 'decode', rule: Array<string>, text: string):
                     break;    
                 }
                 case ' ': {
-                    result += ' ';
+                    result += rule[4];
                     break;
                 }
                 default: {
@@ -173,19 +166,26 @@ function swapChar(mode: 'encode' | 'decode', rule: Array<string>, text: string):
                     result += "b";
                     break;
                 }
-                default: {
+                case rule[4]: {
                     result += " ";
                 }
             }
         }
     }
-    console.log (result);
     return result;
 }
 
 function enter(sealPack: SealPack) {
     const { ctx, msg, cmdArgs, ext } = sealPack.unPack();
     ctx; msg; cmdArgs; ext; // 无作用
+    
+    let rules = {};
+
+    const ruleData = seal.ext.getTemplateConfig(ext, "rulesData");
+    for(let a of ruleData) {
+        let aa = a.split("|");
+        rules[aa[0]] = [aa[1], aa[2], aa[3], aa[4], aa[5]];
+    }
 
     //.trs do 1 XXXX
 
@@ -225,6 +225,5 @@ function enter(sealPack: SealPack) {
 }
 
 export {
-    enter,
-    rules
+    enter
 }

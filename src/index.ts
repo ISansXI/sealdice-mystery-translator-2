@@ -49,7 +49,7 @@ for (let word of Config.awake_words) {
 }
 
 // 注册配置项
-SealConfigRegister.enter()
+SealConfigRegister.enter(new SealPack(null, null, null, ext));
 
 // 确认插件加载完毕
 console.log(seal.ext.find(Config.ext_name) ? gLT("result_ok") : gLT("result_bad"));
