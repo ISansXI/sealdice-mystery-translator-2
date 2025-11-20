@@ -1,3 +1,5 @@
+import { SealPack } from "../types/SealPack";
+
 enum MODEL_INFO {
     NAME = "NoCommandRun"
 }

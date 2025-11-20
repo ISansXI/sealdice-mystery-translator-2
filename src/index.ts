@@ -22,7 +22,6 @@ cmdChatFramework.help = gLT("help_document_base");
 
 cmdChatFramework.solve = (ctx, msg, cmdArgs) => {
   let sealPack = new SealPack(ctx, msg, cmdArgs, ext)
-  console.log("1");
   let val = cmdArgs.getArgN(1);
   switch (val) {
     case 'help': {
@@ -31,8 +30,7 @@ cmdChatFramework.solve = (ctx, msg, cmdArgs) => {
       return ret;
     }
     default: {
-      CommandRun.enter(sealPack);
-      return seal.ext.newCmdExecuteResult(true);
+      return CommandRun.enter(sealPack);
     }
   }
 }

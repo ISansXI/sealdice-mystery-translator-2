@@ -23,11 +23,11 @@ function getListStringByPage(list: Array<any>, page: number, countPerPage: numbe
     else if (page > pageSum) page = pageSum;
 
     const startIndex = (page - 1) * countPerPage;
-    const endIndex = (page) * countPerPage - 1 > listLen ? listLen - 1 : (page) * countPerPage - 1;
+    const endIndex = (page) * countPerPage - 1 > listLen ? listLen - 1 : (page) * countPerPage;
 
     let returnText = fS(gLT("list_formatter_title_format"), title);
     for (let i = startIndex; i < endIndex; i++) {
-        returnText += `\n${i}、${list[i]}`;
+        returnText += `\n${i + 1}、${list[i]}`;
     }
     returnText += `\n${fS(gLT("list_formatter_page_format"), page, pageSum)}`;
     return returnText;
