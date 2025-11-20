@@ -1,0 +1,10 @@
+// ==UserScript==
+// @name         模板项目
+// @author       作者名
+// @version      1.0.0
+// @description  这是Sans修改后的海豹的js扩展模板项目，请自行修改信息
+// @timestamp    2025-11-20
+// 2023/1/23
+// @license      MIT
+// @homepageURL  https://github.com/ISansXI/sealdice-sans-js-ext-template
+// ==/UserScript==
