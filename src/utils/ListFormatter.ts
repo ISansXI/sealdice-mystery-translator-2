@@ -23,7 +23,7 @@ function getListStringByPage(list: Array<any>, page: number, countPerPage: numbe
     else if (page > pageSum) page = pageSum;
 
     const startIndex = (page - 1) * countPerPage;
-    const endIndex = (page) * countPerPage - 1 > listLen ? listLen - 1 : (page) * countPerPage;
+    const endIndex = (page) * countPerPage> listLen ? listLen: (page) * countPerPage;
 
     let returnText = fS(gLT("list_formatter_title_format"), title);
     for (let i = startIndex; i < endIndex; i++) {
