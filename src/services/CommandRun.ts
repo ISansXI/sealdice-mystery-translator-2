@@ -2,6 +2,8 @@ import { SealPack } from "../types/SealPack";
 import * as ShowAvailableTranslators from "./ShowAvailableTranslators";
 import * as DoTranslation from "./DoTranslation";
 import * as DoTranslationAES from "./DoTranslationAES";
+import * as DoTranslationL77 from "./DoTranslationL77";
+import * as DoTranslationPlus from "./DoTranslationPlus";
 
 enum MODEL_INFO {
     NAME = "CommandRun"
@@ -22,7 +24,7 @@ function enter(sealPack: SealPack) {
             break;
         }
         case 'do': {
-            DoTranslation.enter(sealPack);
+            DoTranslationPlus.enter(sealPack);
             break;
         }
         default: {

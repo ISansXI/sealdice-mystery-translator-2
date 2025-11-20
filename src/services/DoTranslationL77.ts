@@ -9,6 +9,128 @@ enum MODEL_INFO {
 MODEL_INFO;
 
 /**
+ * LZ77压缩算法实现
+ * @param data 输入字符串
+ * @param windowSize 滑动窗口大小
+ * @param lookaheadSize 前瞻缓冲区大小
+ * @returns 压缩后的三元组数组 [长度, 偏移量, 下一个字符]
+ */
+function lz77Compress(data: string, windowSize: number = 15, lookaheadSize: number = 15): Array<[number, number, string]> {
+    const result: Array<[number, number, string]> = [];
+    let i = 0;
+    const n = data.length;
+
+    while (i < n) {
+        let bestLength = 0;
+        let bestOffset = 0;
+        const windowStart = Math.max(0, i - windowSize);
+
+        // 在滑动窗口中查找最长匹配
+        for (let j = windowStart; j < i; j++) {
+            let length = 0;
+            while (length < lookaheadSize && i + length < n && data[j + length] === data[i + length]) {
+                length++;
+            }
+            if (length > bestLength) {
+                bestLength = length;
+                bestOffset = i - j;
+            }
+        }
+
+        // 如果找到有效匹配
+        if (bestLength > 0) {
+            const nextChar = i + bestLength < n ? data[i + bestLength] : '';
+            result.push([bestLength, bestOffset, nextChar]);
+            i += bestLength + 1;
+        } else {
+            // 没有找到匹配，直接添加当前字符
+            result.push([0, 0, data[i]]);
+            i++;
+        }
+    }
+
+    return result;
+}
+
+/**
+ * LZ77解压算法实现
+ * @param data 压缩后的三元组数组
+ * @returns 解压后的原始字符串
+ */
+function lz77Decompress(data: Array<[number, number, string]>): string {
+    let result = '';
+
+    for (const [length, offset, char] of data) {
+        if (length > 0) {
+            // 根据偏移量和长度复制之前的子串
+            const start = result.length - offset;
+            for (let i = 0; i < length; i++) {
+                result += result[start + i];
+            }
+        }
+        // 添加下一个字符
+        if (char) {
+            result += char;
+        }
+    }
+
+    return result;
+}
+
+/**
+ * 将压缩后的三元组转换为可映射的字符串
+ * @param compressed 压缩后的三元组数组
+ * @returns 编码字符串
+ */
+function compressToBinaryString(compressed: Array<[number, number, string]>): string {
+    let result = '';
+    for (const [length, offset, char] of compressed) {
+        // 将长度和偏移量转换为4位二进制
+        const lengthBin = length.toString(2).padStart(4, '0');
+        const offsetBin = offset.toString(2).padStart(4, '0');
+        // 字符转换为8位二进制
+        const charCode = char.charCodeAt(0);
+        const charBin = charCode.toString(2).padStart(8, '0');
+        // 拼接
+        result += lengthBin + offsetBin + charBin;
+    }
+    return result;
+}
+
+/**
+ * 将二进制字符串转换回压缩后的三元组
+ * @param binaryStr 二进制字符串
+ * @returns 压缩后的三元组数组
+ */
+function binaryStringToCompressed(binaryStr: string): Array<[number, number, string]> {
+    const result: Array<[number, number, string]> = [];
+    let i = 0;
+    const n = binaryStr.length;
+
+    while (i < n) {
+        // 提取4位长度
+        const lengthBin = binaryStr.substr(i, 4);
+        const length = parseInt(lengthBin, 2);
+        i += 4;
+
+        // 提取4位偏移量
+        const offsetBin = binaryStr.substr(i, 4);
+        const offset = parseInt(offsetBin, 2);
+        i += 4;
+
+        // 提取8位字符
+        const charBin = binaryStr.substr(i, 8);
+        const charCode = parseInt(charBin, 2);
+        const char = String.fromCharCode(charCode);
+        i += 8;
+
+        result.push([length, offset, char]);
+    }
+
+    return result;
+}
+
+/**
  * 将任意字符串转换为其对应的二进制字符串表示。
  * 每个字符的二进制前会加上 '0b' 前缀以示区分，并用空格隔开。
  *
@@ -20,22 +142,18 @@ function stringToBinary(str: string): string {
         throw new TypeError('输入必须是字符串类型');
     }
 
-    let binaryParts: string[] = []; // 使用数组来存储每个字符的二进制串
-
+    let binary = '';
     for (let i = 0; i < str.length;) {
         const codePoint = str.codePointAt(i);
         if (codePoint !== undefined) {
-            // 将每个字符的二进制表示作为一个独立的元素存入数组
-            binaryParts.push(`0b${codePoint.toString(2)}`);
-            // 根据码点是否为BMP字符，决定i递增1还是2
+            // 转换为二进制，不添加前缀，每个字符用16位表示
+            binary += codePoint.toString(2).padStart(16, '0');
             i += codePoint <= 0xFFFF ? 1 : 2;
         } else {
             i++;
         }
     }
-
-    // 使用空格将数组中的所有元素连接成一个字符串
-    return binaryParts.join(' ');
+    return binary;
 }
 
 /**
@@ -121,56 +239,46 @@ function getSubstring(str: string, startIndex: number, length: number): string {
 }
 
 function swapChar(mode: 'encode' | 'decode', rule: Array<string>, text: string): string {
-    let step;
-
     let result = "";
-    if(mode === 'encode') {
-        // 翻译到不是人话的时候
-        step = 1;
-        for (let i = 0; i < text.length; i+= step) {
-            const char = text[i];
-            switch(char) {
-                case '0': {
+    if (mode === 'encode') {
+        // 压缩文本
+        const compressed = lz77Compress(text);
+        const binaryStr = compressToBinaryString(compressed);
+
+        // 映射为目标字符
+        for (const char of binaryStr) {
+            switch (char) {
+                case '0':
                     result += rule[1];
                     break;
-                }
-                case '1': {
+                case '1':
                     result += rule[2];
-                    break;    
-                }
-                case ' ': {
-                    result += rule[4];
                     break;
-                }
-                default: {
+                default:
                     result += rule[3];
-                }
             }
         }
-    }
-    else {
-        // 翻译到是人话的时候
-        step = parseInt(rule[0]);
+    } else {
+        // 解码时，先将目标字符映射回二进制
+        let binaryStr = "";
+        const step = parseInt(rule[0]);
         for (let i = 0; i < text.length; i += step) {
-            const subString = getSubstring(text, i, step);
+            const subString = text.substr(i, step);
             switch (subString) {
-                case rule[1]: {
-                    result += "0";
+                case rule[1]:
+                    binaryStr += "0";
                     break;
-                }
-                case rule[2]: {
-                    result += "1";
+                case rule[2]:
+                    binaryStr += "1";
                     break;
-                }
-                case rule[3]: {
-                    result += "b";
-                    break;
-                }
-                case rule[4]: {
-                    result += " ";
-                }
+                default:
+                    binaryStr += "0"; // 默认值，可根据实际情况调整
             }
         }
+
+        // 解压二进制字符串
+        const compressed = binaryStringToCompressed(binaryStr);
+        result = lz77Decompress(compressed);
     }
     return result;
 }
@@ -212,14 +320,16 @@ function enter(sealPack: SealPack) {
             let binaryText1 = swapChar("decode", rules[fromL], textRaw);
             let translatedText1 = binaryToString(binaryText1);
             binaryText = stringToBinary(translatedText1);
+            // 压缩二进制字符串后映射
             translatedText = swapChar("encode", rules[toL], binaryText);
         }
         else {
             binaryText = stringToBinary(textRaw);
+            // 压缩二进制字符串后映射
             translatedText = swapChar("encode", rules[toL], binaryText);
         }
     }
-    
+
     seal.replyToSender(ctx, msg, translatedText);
     return;
 }
