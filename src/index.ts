@@ -2,6 +2,7 @@ import { Config } from "./misc/Config";
 import * as CommandRun from "./services/CommandRun";
 import * as NoCommandRun from "./services/NoCommandRun";
 import * as SealConfigRegister from "./services/SealConfigRegister";
+import { SealPack } from "./types/SealPack";
 import { gLT } from "./utils/I18n";
 import { fS } from "./utils/StringFormatter";
 
@@ -21,6 +22,7 @@ cmdChatFramework.help = gLT("help_document_base");
 
 cmdChatFramework.solve = (ctx, msg, cmdArgs) => {
   let sealPack = new SealPack(ctx, msg, cmdArgs, ext)
+  console.log("1");
   let val = cmdArgs.getArgN(1);
   switch (val) {
     case 'help': {

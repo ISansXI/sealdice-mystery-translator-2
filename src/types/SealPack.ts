@@ -12,6 +12,10 @@ class SealPack {
     }
 
     unPack(): { ctx: seal.MsgContext, msg: seal.Message, cmdArgs: seal.CmdArgs, ext: seal.ExtInfo } {
-        return {ctx: this.ctx, msg: this.msg, cmdArgs: this.cmdArgs, ext: this.ext}
+        return { ctx: this.ctx, msg: this.msg, cmdArgs: this.cmdArgs, ext: this.ext }
     }
+}
+
+export {
+    SealPack
 }

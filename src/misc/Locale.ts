@@ -15,7 +15,8 @@ const LOCALIZATION = {
         "list_formatter_title_default": "该项目",
         "list_formatter_title_format": "%s的查询结果为:",
         "list_formatter_page_format": "第%s页/共%s页",
-        "help_document_base": "第一层指令的帮助文档"
+        "help_document_base": "-available/a: 查看可用的语言\n-do <A语> <文本内容>: 把文本内容翻译到A语",
+        "available_languages":"可用的语言"
     },
     "en": {
         "test": "Test",

@@ -1,4 +1,4 @@
-var filename = 'sealdice-js-ext.js'
+var filename = 'sealdice-mystery-translator-2.js'
 
 module.exports = {
   dev: {
